@@ -22,7 +22,11 @@ pipeline {
                     sh "git fetch --all"
 
                     def releaseBranch = sh(
-                        script: "git symbolic-ref --short HEAD || git branch --show-current || echo 'main'",
+                        script: """
+                            git symbolic-ref --short HEAD 2>/dev/null ||
+                            git branch --show-current 2>/dev/null ||
+                            git name-rev --name-only HEAD | sed 's#remotes/origin/##'
+                        """,
                         returnStdout: true
                     ).trim()
 
@@ -44,7 +48,6 @@ pipeline {
                 }
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 script {
