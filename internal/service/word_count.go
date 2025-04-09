@@ -19,3 +19,7 @@ func (svc *WordCountService) CountWords(text string) int {
 
 	return len(words)
 }
+
+func (svc *WordCountService) CountWords2(text string) int {
+	return len(strings.Fields(text))
+}
