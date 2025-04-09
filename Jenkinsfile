@@ -68,12 +68,13 @@ pipeline {
                     sh "docker run --rm builder-test go test ./..."
                 }
             }
-        }
+        }git tag -d v1.2.1
 
         stage('Tag Release') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     sh """
+                        git tag -d v1.2.1
                         git config user.name "jenkins"
                         git config user.email "jenkins@example.com"
                         git tag v${VERSION}
