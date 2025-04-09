@@ -18,21 +18,22 @@ pipeline {
 
         stage('Calculate Version') {
             steps {
-                script {
-                    def releaseBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-                    def majorVersion = releaseBranch.replaceAll("release/v", "")
+                    script {
+                        sh "git fetch --all"
+                        def releaseBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                        def majorVersion = releaseBranch.replaceAll("release/v", "")
 
-                    def featureMerges = sh(script: "git log origin/${releaseBranch} --merges --grep='Merge branch 'feature/*'' --oneline | wc -l", returnStdout: true).trim()
-                    def bugfixMerges = sh(script: "git log origin/${releaseBranch} --merges --grep='Merge branch 'bugfix/*'' --oneline | wc -l", returnStdout: true).trim()
+                        def featureMerges = sh(script: "git log origin/${releaseBranch} --merges --grep=\"Merge branch 'feature/*'\" --oneline | wc -l", returnStdout: true).trim()
+                        def bugfixMerges = sh(script: "git log origin/${releaseBranch} --merges --grep=\"Merge branch 'bugfix/*'\" --oneline | wc -l", returnStdout: true).trim()
 
-                    env.MAJOR = majorVersion
-                    env.MINOR = featureMerges
-                    env.PATCH = bugfixMerges
-                    env.VERSION = "${MAJOR}.${MINOR}.${PATCH}"
+                        env.MAJOR = majorVersion
+                        env.MINOR = featureMerges
+                        env.PATCH = bugfixMerges
+                        env.VERSION = "${MAJOR}.${MINOR}.${PATCH}"
 
-                    echo "Calculated version: ${env.VERSION}"
+                        echo "Calculated version: ${env.VERSION}"
+                    }
                 }
-            }
         }
 
         stage('Build Docker Image') {
