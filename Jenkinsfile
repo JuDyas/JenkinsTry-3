@@ -80,10 +80,8 @@ pipeline {
                      )
                  ]) {
                      sh '''
-                         # Подтягиваем данные (все теги) из удалённого репозитория
                          git fetch --tags
 
-                         # Проверяем, существует ли в репозитории уже тег с текущей версией
                          if git rev-parse "refs/tags/v${VERSION}" >/dev/null 2>&1; then
                              echo "Tag v${VERSION} already exists. Skipping creation..."
                          else
