@@ -71,18 +71,35 @@ pipeline {
         }
 
         stage('Tag Release') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    sh """
-                        git tag -d v1.2.1
-                        git config user.name "jenkins"
-                        git config user.email "jenkins@example.com"
-                        git tag v${VERSION}
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/YourRepoOwner/YourRepoName.git v${VERSION}
-                    """
-                }
-            }
-        }
+             steps {
+                 withCredentials([
+                     usernamePassword(
+                         credentialsId: env.GIT_CREDENTIALS_ID,
+                         usernameVariable: 'GIT_USERNAME',
+                         passwordVariable: 'GIT_PASSWORD'
+                     )
+                 ]) {
+                     sh '''
+                         # Подтягиваем данные (все теги) из удалённого репозитория
+                         git fetch --tags
+
+                         # Проверяем, существует ли в репозитории уже тег с текущей версией
+                         if git rev-parse "refs/tags/v${VERSION}" >/dev/null 2>&1; then
+                             echo "Tag v${VERSION} already exists. Skipping creation..."
+                         else
+                             echo "Creating new tag v${VERSION}..."
+                             git config user.name "jenkins"
+                             git config user.email "jenkins@example.com"
+                             git tag v${VERSION}
+
+                             echo "Pushing new tag v${VERSION} to remote repository..."
+                             GIT_HTTPS_URL="https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/JuDyas/JenkinsTry-3.git"
+                             git push $GIT_HTTPS_URL v${VERSION}
+                         fi
+                     '''
+                 }
+             }
+         }
 
         stage('Deploy') {
             steps {
