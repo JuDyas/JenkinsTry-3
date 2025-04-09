@@ -72,12 +72,12 @@ pipeline {
 
         stage('Tag Release') {
             steps {
-                sshagent([env.GIT_CREDENTIALS_ID]) {
+                withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     sh """
                         git config user.name "jenkins"
                         git config user.email "jenkins@example.com"
                         git tag v${VERSION}
-                        git push origin v${VERSION}
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/YourRepoOwner/YourRepoName.git v${VERSION}
                     """
                 }
             }
