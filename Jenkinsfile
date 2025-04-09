@@ -2,13 +2,12 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'JuDyas/JenkinsTry'
+        DOCKER_IMAGE = 'judyas/jenkinstry'
         GIT_CREDENTIALS_ID = 'git-credentials'
         DOCKER_HOST = "unix:///var/run/docker.sock"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 sh 'docker ps'
