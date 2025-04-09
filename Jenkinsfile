@@ -68,7 +68,7 @@ pipeline {
                     sh "docker run --rm builder-test go test ./..."
                 }
             }
-        }git tag -d v1.2.1
+        }
 
         stage('Tag Release') {
             steps {
