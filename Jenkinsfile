@@ -17,37 +17,42 @@ pipeline {
         }
 
         stage('Calculate Version') {
-              steps {
-                  script {
-                      sh "git fetch --all --prune"
+               steps {
+                   script {
+                       sh "git fetch --all --prune"
 
-                      def releaseBranch = sh(
-                          script: """
-                              git symbolic-ref --short HEAD 2>/dev/null || \
-                              git for-each-ref --format='%(refname:short)' --points-at HEAD refs/remotes/origin/release/* | sed 's#^origin/##' || \
-                              echo ''
-                          """,
-                          returnStdout: true
-                      ).trim()
+                       def releaseBranch = sh(
+                           script: """
+                               git symbolic-ref --short HEAD 2>/dev/null || \
+                               git for-each-ref --format='%(refname:short)' --points-at HEAD refs/remotes/origin/release/* | sed 's#^origin/##' || \
+                               echo ''
+                           """,
+                           returnStdout: true
+                       ).trim()
 
-                      if (!releaseBranch.startsWith("release/v")) {
-                          error "ERROR: Current branch '${releaseBranch}' doesn't match the required release/v* format!"
-                      }
+                       if (!releaseBranch.startsWith("release/v")) {
+                           error "ERROR: Current branch '${releaseBranch}' doesn't match the required release/v* format!"
+                       }
 
-                      def majorVersion = releaseBranch.replaceAll("release/v", "")
+                       def majorVersion = releaseBranch.replaceAll("release/v", "")
 
-                      def featureMerges = sh(script: "git log origin/${releaseBranch} --merges --grep=\"Merge branch 'feature/*'\" --oneline | wc -l", returnStdout: true).trim()
-                      def bugfixMerges = sh(script: "git log origin/${releaseBranch} --merges --grep=\"Merge branch 'bugfix/*'\" --oneline | wc -l", returnStdout: true).trim()
+                       def featureMerges = sh(script: """
+                           git log origin/${releaseBranch} --merges --oneline | grep "feature/" | sort | uniq | wc -l
+                       """, returnStdout: true).trim()
 
-                      env.MAJOR = majorVersion
-                      env.MINOR = featureMerges
-                      env.PATCH = bugfixMerges
-                      env.VERSION = "${MAJOR}.${MINOR}.${PATCH}".toLowerCase()
+                       def bugfixMerges = sh(script: """
+                           git log origin/${releaseBranch} --merges --oneline | grep "bugfix/" | sort | uniq | wc -l
+                       """, returnStdout: true).trim()
 
-                      echo "Calculated version: ${env.VERSION}"
-                  }
-              }
-          }
+                       env.MAJOR = majorVersion
+                       env.MINOR = featureMerges
+                       env.PATCH = bugfixMerges
+                       env.VERSION = "${MAJOR}.${MINOR}.${PATCH}".toLowerCase()
+
+                       echo "Calculated version: ${env.VERSION}"
+                   }
+               }
+           }
 
         stage('Build Docker Image') {
             steps {
