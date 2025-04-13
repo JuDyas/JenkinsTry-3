@@ -12,7 +12,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - jenkins-net
-    restart: always
+    restart: on-failure
 
 volumes:
   jenkins_home:
