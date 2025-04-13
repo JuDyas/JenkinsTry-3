@@ -63,7 +63,6 @@ func TestWordCountService_CountWords(t *testing.T) {
 	}
 
 	svc := NewWordCountService()
-	//Lololo
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
